@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Hotel & Restaurant Manager 🌟</title>
+    <style>
+        :root {
+            --dark-blue: #2c3e50;
+            --medium-blue: #34495e;
+            --light-blue: #7fb3d5;
+            --night-blue: #1a2b3c;
+            --green: #2ecc71;
+            --dark-green: #27ae60;
+            --red: #e74c3c;
+            --orange: #f39c12;
+            --yellow: #f1c40f;
+            --purple: #9b59b6;
+            --light-gray: #ecf0f1;
+            --medium-gray: #bdc3c7;
+            --dark-gray: #95a5a6;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark-blue);
+            color: white;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background-color: var(--medium-blue);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Animation Canvas */
+        .animation-canvas {
+            background-color: var(--light-blue);
+            height: 100px;
+            margin: 10px 0;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animation-canvas.night {
+            background-color: var(--night-blue);
+        }
+
+        .staff-character {
+            position: absolute;
+            bottom: 10px;
+            width: 50px;
+            height: 80px;
+        }
+
+        .staff-label {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: white;
+        }
+
+        .sun-moon {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--yellow);
+            top: 20px;
+            left: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: -1px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background-color: var(--medium-blue);
+            border: 1px solid var(--dark-blue);
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .tab.active {
+            background-color: var(--light-gray);
+            color: var(--dark-blue);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            background-color: var(--light-gray);
+            color: var(--dark-blue);
+            padding: 15px;
+            border-radius: 0 5px 5px 5px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Common panel styles */
+        .panel {
+            background-color: var(--medium-gray);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .panel-header {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--dark-blue);
+            text-align: center;
+        }
+
+        /* Restaurant tab */
+        .restaurant-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        .restaurant-left,
+        .restaurant-right {
+            flex: 1;
+        }
+
+        .menu-item {
+            background-color: var(--light-gray);
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .orders-list,
+        .bookings-list,
+        .cooking-list {
+            background-color: var(--light-gray);
+            height: 150px;
+            overflow-y: auto;
+            padding: 5px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        .order-item,
+        .booking-item {
+            padding: 5px;
+            margin-bottom: 3px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        /* Customer canvas */
+        .customer-canvas {
+            background-color: var(--light-gray);
+            height: 150px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 20px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .customer {
+            width: 60px;
+            height: 90px;
+            position: relative;
+        }
+
+        .customer-satisfaction {
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+
+        .btn-green {
+            background-color: var(--dark-green);
+        }
+
+        .btn-red {
+            background-color: var(--red);
+        }
+
+        .btn-orange {
+            background-color: var(--orange);
+        }
+
+        .btn-blue {
+            background-color: #3498db;
+        }
+
+        .btn-purple {
+            background-color: var(--purple);
+        }
+
+        /* Staff tab */
+        .staff-item {
+            background-color: var(--medium-gray);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Progress bars */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .progress-bar {
+            height: 20px;
+            width: 100px;
+            background-color: #ddd;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--green);
+        }
+
+        /* Stats text */
+        .stats-text {
+            background-color: var(--medium-gray);
+            padding: 15px;
+            border-radius: 3px;
+            white-space: pre-line;
+            line-height: 1.5;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            color: var(--dark-blue);
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .modal-close {
+            background-color: var(--red);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .restaurant-container {
+                flex-direction: column;
+            }
+
+            .info-panel {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <div class="info-item" id="day-label">Day 1 | 8:00</div>
+            <div class="info-item" id="money-label">💰 $10000</div>
+            <div class="info-item" id="level-label">🏆 Level 1</div>
+            <div class="info-item" id="exp-label">📊 EXP: 0/100</div>
+
+            <div class="progress-container">
+                <span>Rep:</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="rep-bar" style="width: 50%;"></div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <span>Clean:</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="clean-bar" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <span>Satisfaction:</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="sat-bar" style="width: 75%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Animation Canvas -->
+        <div class="animation-canvas" id="animation-canvas">
+            <div class="sun-moon">☀️</div>
+            <!-- Staff characters will be added here by JavaScript -->
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="restaurant">🍽️ Restaurant</div>
+            <div class="tab" data-tab="hotel">🏨 Hotel</div>
+            <div class="tab" data-tab="staff">👨‍🍳 Staff</div>
+            <div class="tab" data-tab="upgrades">🛠️ Upgrades</div>
+            <div class="tab" data-tab="kitchen">👨‍🍳 Kitchen</div>
+            <div class="tab" data-tab="stats">📊 Stats</div>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="tab-content active" id="restaurant-tab">
+            <div class="restaurant-container">
+                <div class="restaurant-left">
+                    <div class="panel">
+                        <div class="panel-header">🍴 MENU</div>
+                        <div id="menu-items">
+                            <!-- Menu items will be added here by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">📋 CURRENT ORDERS</div>
+                        <div class="orders-list" id="orders-list">
+                            <!-- Orders will be added here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="restaurant-right">
+                    <div class="panel">
+                        <div class="panel-header">👥 WAITING CUSTOMERS</div>
+                        <div class="customer-canvas" id="customer-canvas">
+                            <!-- Customer images will be added here by JavaScript -->
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Current Customer Mood:</span>
+                            <span id="current-sat-label">😊</span>
+                        </div>
+
+                        <button class="btn btn-red" id="serve-customer-btn">🍽️ Serve Customer</button>
+                        <button class="btn btn-orange" id="clean-tables-btn">🧹 Clean Tables</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="hotel-tab">
+            <div class="panel">
+                <div class="panel-header">🏢 RECEPTION</div>
+                <div id="room-status">
+                    <!-- Room status will be added here by JavaScript -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">📅 CURRENT BOOKINGS</div>
+                <div class="bookings-list" id="bookings-list">
+                    <!-- Bookings will be added here by JavaScript -->
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-green" id="checkin-btn">🔑 Check-in Customer</button>
+                <button class="btn btn-red" id="checkout-btn">🚪 Check-out Customer</button>
+                <button class="btn btn-orange" id="clean-rooms-btn">🧹 Clean Rooms</button>
+            </div>
+        </div>
+
+        <div class="tab-content" id="staff-tab">
+            <div class="panel">
+                <div class="panel-header">👥 STAFF MANAGEMENT</div>
+                <div id="staff-list">
+                    <!-- Staff items will be added here by JavaScript -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">📊 STAFF EFFICIENCY</div>
+                <div class="stats-text" id="efficiency-text">
+                    <!-- Efficiency text will be added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="upgrades-tab">
+            <div class="panel">
+                <div class="panel-header">✨ BUSINESS UPGRADES ✨</div>
+                <div id="upgrades-list">
+                    <!-- Upgrades will be added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="kitchen-tab">
+            <div class="panel">
+                <div class="panel-header">🍳 KITCHEN OPERATIONS 🍲</div>
+                <div class="panel-header">⏳ COOKING QUEUE</div>
+                <div class="cooking-list" id="cooking-list">
+                    <!-- Cooking queue will be added here by JavaScript -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">📊 KITCHEN STATISTICS</div>
+                <div class="stats-text" id="kitchen-stats">
+                    <!-- Kitchen stats will be added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="stats-tab">
+            <div class="panel">
+                <div class="panel-header">📈 BUSINESS STATISTICS</div>
+                <div class="stats-text" id="stats-text">
+                    <!-- Stats text will be added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-title">Title</div>
+            <div id="modal-message">Message goes here</div>
+            <button class="modal-close" id="modal-close">Close</button>
+        </div>
+    </div>
+
+    <script>
+        class HotelRestaurantManager {
+            constructor() {
+                // Game state
+                this.money = 10000;
+                this.level = 1;
+                this.experience = 0;
+                this.expNeeded = 100;
+                this.reputation = 50;
+                this.cleanliness = 100;
+                this.day = 1;
+                this.timeOfDay = 8; // 8 AM
+                this.dayLength = 60; // seconds
+                this.isNight = false;
+                this.satisfaction = 75;
+
+                // Staff
+                this.staff = {
+                    chefs: 2,
+                    waiters: 3,
+                    cleaners: 1,
+                    receptionists: 1
+                };
+
+                // Rooms
+                this.rooms = {
+                    single: { total: 5, occupied: 0, price: 100, dirty: 0 },
+                    double: { total: 3, occupied: 0, price: 150, dirty: 0 },
+                    suite: { total: 1, occupied: 0, price: 300, dirty: 0 }
+                };
+
+                // Menu
+                this.menu = {
+                    Burger: { price: 15, cost: 5, time: 10, popularity: 0 },
+                    Pizza: { price: 20, cost: 8, time: 15, popularity: 0 },
+                    Pasta: { price: 18, cost: 6, time: 12, popularity: 0 },
+                    Salad: { price: 12, cost: 4, time: 5, popularity: 0 },
+                    Steak: { price: 35, cost: 15, time: 20, popularity: 0 }
+                };
+
+                // Orders and bookings
+                this.orders = [];
+                this.bookings = [];
+                this.customersWaiting = [];
+
+                // Animation frame counter
+                this.animationFrame = 0;
+
+                // Initialize the game
+                this.initDOM();
+                this.createWidgets();
+                this.startGameLoop();
+                this.startDayNightCycle();
+
+                // Load sounds
+                this.sounds = {
+                    order: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3'),
+                    cooking: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-kitchen-timer-alert-906.mp3'),
+                    money: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cash-register-purchase-880.mp3'),
+                    level_up: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'),
+                    clean: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cleaning-spray-squeeze-2574.mp3')
+                };
+
+                // Set sound volume
+                for (const sound in this.sounds) {
+                    this.sounds[sound].volume = 0.3;
+                }
+            }
+
+            initDOM() {
+                // Tab switching
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                        tab.classList.add('active');
+                        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                    });
+                });
+
+                // Modal close button
+                document.getElementById('modal-close').addEventListener('click', () => {
+                    document.getElementById('modal').style.display = 'none';
+                });
+
+                // Buttons
+                document.getElementById('serve-customer-btn').addEventListener('click', () => this.serveCustomer());
+                document.getElementById('clean-tables-btn').addEventListener('click', () => this.cleanTables());
+                document.getElementById('checkin-btn').addEventListener('click', () => this.checkinCustomer());
+                document.getElementById('checkout-btn').addEventListener('click', () => this.checkoutCustomer());
+                document.getElementById('clean-rooms-btn').addEventListener('click', () => this.cleanRooms());
+            }
+
+            createWidgets() {
+                this.updateDisplays();
+                this.createMenuItems();
+                this.createRoomStatus();
+                this.createStaffList();
+                this.createUpgradesList();
+            }
+
+            updateDisplays() {
+                // Update info panel
+                document.getElementById('day-label').textContent = `Day ${this.day} | ${this.timeOfDay}:00 ${this.isNight ? '🌙' : '☀️'}`;
+                document.getElementById('money-label').textContent = `💰 $${this.money}`;
+                document.getElementById('level-label').textContent = `🏆 Level ${this.level}`;
+                document.getElementById('exp-label').textContent = `📊 EXP: ${this.experience}/${this.expNeeded}`;
+
+                // Update progress bars
+                document.getElementById('rep-bar').style.width = `${this.reputation}%`;
+                document.getElementById('clean-bar').style.width = `${this.cleanliness}%`;
+                document.getElementById('sat-bar').style.width = `${this.satisfaction}%`;
+
+                // Check for level up
+                if (this.experience >= this.expNeeded) {
+                    this.levelUp();
+                }
+            }
+
+            createMenuItems() {
+                const menuContainer = document.getElementById('menu-items');
+                menuContainer.innerHTML = '';
+
+                for (const [item, details] of Object.entries(this.menu)) {
+                    const stars = '★'.repeat(Math.floor(details.popularity / 20)) || '☆';
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'menu-item';
+                    itemDiv.innerHTML = `
+                        <span>${item} - $${details.price} ${stars}</span>
+                        <button class="btn btn-green" data-item="${item}">Add to Order</button>
+                    `;
+
+                    menuContainer.appendChild(itemDiv);
+
+                    // Add event listener to the button
+                    itemDiv.querySelector('button').addEventListener('click', (e) => {
+                        this.addToOrder(e.target.dataset.item);
+                    });
+                }
+            }
+
+            createRoomStatus() {
+                const roomContainer = document.getElementById('room-status');
+                roomContainer.innerHTML = '';
+
+                for (const [roomType, details] of Object.entries(this.rooms)) {
+                    const cleanEmoji = details.dirty === 0 ? '✨' : '💩';
+
+                    const roomDiv = document.createElement('div');
+                    roomDiv.className = 'menu-item';
+                    roomDiv.innerHTML = `
+                        <span>${roomType.charAt(0).toUpperCase() + roomType.slice(1)} Rooms: ${details.occupied}/${details.total} ${cleanEmoji} - $${details.price}/night</span>
+                        <button class="btn btn-blue" data-room="${roomType}">Book</button>
+                    `;
+
+                    roomContainer.appendChild(roomDiv);
+
+                    // Add event listener to the button
+                    roomDiv.querySelector('button').addEventListener('click', (e) => {
+                        this.bookRoom(e.target.dataset.room);
+                    });
+                }
+            }
+
+            createStaffList() {
+                const staffContainer = document.getElementById('staff-list');
+                staffContainer.innerHTML = '';
+
+                for (const [staffType, count] of Object.entries(this.staff)) {
+                    const icon = this.getStaffIcon(staffType);
+                    const hireCost = 1000 + (count * 200);
+
+                    const staffDiv = document.createElement('div');
+                    staffDiv.className = 'staff-item';
+                    staffDiv.innerHTML = `
+                        <span>${icon} ${staffType.charAt(0).toUpperCase() + staffType.slice(1)}: ${count}</span>
+                        <button class="btn btn-green" data-staff="${staffType}" data-cost="${hireCost}">Hire (+$${hireCost})</button>
+                    `;
+
+                    staffContainer.appendChild(staffDiv);
+
+                    // Add event listener to the button
+                    staffDiv.querySelector('button').addEventListener('click', (e) => {
+                        this.hireStaff(e.target.dataset.staff, parseInt(e.target.dataset.cost));
+                    });
+                }
+
+                this.updateEfficiencyDisplay();
+            }
+
+            getStaffIcon(staffType) {
+                switch (staffType) {
+                    case 'chefs': return '👨‍🍳';
+                    case 'waiters': return '💁';
+                    case 'cleaners': return '🧹';
+                    case 'receptionists': return '💼';
+                    default: return '👤';
+                }
+            }
+
+            createUpgradesList() {
+                const upgradesContainer = document.getElementById('upgrades-list');
+                upgradesContainer.innerHTML = '';
+
+                const upgrades = [
+                    { name: "🛏️ Add Single Room", cost: 5000, action: () => this.addRoom('single') },
+                    { name: "🛏️🛏️ Add Double Room", cost: 8000, action: () => this.addRoom('double') },
+                    { name: "🏰 Add Suite", cost: 15000, action: () => this.addRoom('suite') },
+                    { name: "👨‍🍳 Kitchen Equipment", cost: 3000, action: () => this.upgradeKitchen() },
+                    { name: "🪑 Better Furniture", cost: 4000, action: () => this.upgradeFurniture() },
+                    { name: "📢 Marketing Campaign", cost: 2000, action: () => this.marketingCampaign() },
+                    { name: "🎨 Interior Design", cost: 6000, action: () => this.upgradeInterior() },
+                    { name: "🌿 Garden Landscaping", cost: 4500, action: () => this.upgradeGarden() }
+                ];
+
+                upgrades.forEach(upgrade => {
+                    const upgradeDiv = document.createElement('div');
+                    upgradeDiv.className = 'menu-item';
+                    upgradeDiv.innerHTML = `
+                        <span>${upgrade.name} - $${upgrade.cost}</span>
+                        <button class="btn btn-purple" data-cost="${upgrade.cost}">Buy</button>
+                    `;
+
+                    upgradesContainer.appendChild(upgradeDiv);
+
+                    // Add event listener to the button
+                    upgradeDiv.querySelector('button').addEventListener('click', () => {
+                        this.buyUpgrade(upgrade.cost, upgrade.action);
+                    });
+                });
+            }
+
+            updateOrdersDisplay() {
+                const ordersList = document.getElementById('orders-list');
+                ordersList.innerHTML = '';
+
+                this.orders.forEach(order => {
+                    const status = order.status === 'ready' ? '✓ Ready' : '⏳ Cooking';
+                    const sat = Math.floor(order.satisfaction || 100);
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'order-item';
+                    orderDiv.textContent = `${order.item} for ${order.customer} - ${status} (${sat}%)`;
+                    ordersList.appendChild(orderDiv);
+                });
+            }
+
+            updateBookingsDisplay() {
+                const bookingsList = document.getElementById('bookings-list');
+                bookingsList.innerHTML = '';
+
+                this.bookings.forEach(booking => {
+                    const checkIn = this.formatDate(booking.checkIn);
+                    const checkOut = this.formatDate(booking.checkOut);
+                    const bookingDiv = document.createElement('div');
+                    bookingDiv.className = 'booking-item';
+                    bookingDiv.textContent = `${booking.customer} - ${booking.roomType} (${checkIn} to ${checkOut})`;
+                    bookingsList.appendChild(bookingDiv);
+                });
+            }
+
+            formatDate(date) {
+                return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+            }
+
+            updateCustomerDisplay() {
+                const customerCanvas = document.getElementById('customer-canvas');
+                customerCanvas.innerHTML = '';
+
+                if (this.customersWaiting.length === 0) {
+                    const noCustomers = document.createElement('div');
+                    noCustomers.textContent = 'No customers waiting';
+                    noCustomers.style.color = '#7f8c8d';
+                    noCustomers.style.fontSize = '14px';
+                    noCustomers.style.margin = 'auto';
+                    customerCanvas.appendChild(noCustomers);
+
+                    document.getElementById('current-sat-label').textContent = '😴';
+                    return;
+                }
+
+                // Display up to 6 customers
+                const customersToShow = this.customersWaiting.slice(0, 6);
+
+                customersToShow.forEach((customer, i) => {
+                    const customerDiv = document.createElement('div');
+                    customerDiv.className = 'customer';
+
+                    // Create a colored box as a placeholder for customer image
+                    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3'];
+                    const color = colors[this.hashCode(customer) % colors.length];
+                    customerDiv.style.backgroundColor = color;
+
+                    // Add satisfaction emoji
+                    const sat = this.calculateCustomerSatisfaction(customer);
+                    const emoji = this.getSatisfactionEmoji(sat);
+
+                    const satDiv = document.createElement('div');
+                    satDiv.className = 'customer-satisfaction';
+                    satDiv.textContent = emoji;
+
+                    customerDiv.appendChild(satDiv);
+                    customerCanvas.appendChild(customerDiv);
+                });
+
+                // Update current satisfaction
+                const avgSat = this.customersWaiting.reduce((sum, customer) => {
+                    return sum + this.calculateCustomerSatisfaction(customer);
+                }, 0) / this.customersWaiting.length || 75;
+
+                document.getElementById('current-sat-label').textContent = this.getSatisfactionEmoji(avgSat);
+            }
+
+            hashCode(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return hash;
+            }
+
+            calculateCustomerSatisfaction(customer) {
+                const baseSat = this.satisfaction;
+                // Add random variation
+                return Math.max(0, Math.min(100, baseSat + Math.floor(Math.random() * 41) - 20));
+            }
+
+            getSatisfactionEmoji(satisfaction) {
+                if (satisfaction >= 80) return "😍";
+                if (satisfaction >= 60) return "😊";
+                if (satisfaction >= 40) return "😐";
+                if (satisfaction >= 20) return "😕";
+                return "😠";
+            }
+
+            updateEfficiencyDisplay() {
+                const efficiencyText = document.getElementById('efficiency-text');
+
+                // Calculate efficiency based on staff count
+                const chefEfficiency = Math.min(100, this.staff.chefs * 25);
+                const waiterEfficiency = Math.min(100, this.staff.waiters * 20);
+                const cleanerEfficiency = Math.min(100, this.staff.cleaners * 30);
+                const receptionEfficiency = Math.min(100, this.staff.receptionists * 40);
+
+                const stars = (eff) => '⭐'.repeat(Math.floor(eff / 20));
+
+                efficiencyText.innerHTML = `
+                    <b>📊 STAFF EFFICIENCY REPORT:</b><br><br>
+                    👨‍🍳 Kitchen Efficiency: ${chefEfficiency}% ${stars(chefEfficiency)}<br>
+                    💁 Service Efficiency: ${waiterEfficiency}% ${stars(waiterEfficiency)}<br>
+                    🧹 Cleanliness Efficiency: ${cleanerEfficiency}% ${stars(cleanerEfficiency)}<br>
+                    💼 Reception Efficiency: ${receptionEfficiency}% ${stars(receptionEfficiency)}<br><br>
+                    <i>Higher efficiency = Faster service & happier customers!</i>
+                `;
+            }
+
+            updateKitchenStats() {
+                const kitchenStats = document.getElementById('kitchen-stats');
+                const cookingList = document.getElementById('cooking-list');
+
+                // Update cooking queue
+                cookingList.innerHTML = '';
+                this.orders.filter(o => o.status === 'pending').forEach(order => {
+                    const cookTime = this.menu[order.item].time;
+                    const item = document.createElement('div');
+                    item.className = 'order-item';
+                    item.textContent = `${order.item} for ${order.customer} - ${cookTime}s`;
+                    cookingList.appendChild(item);
+                });
+
+                // Calculate stats
+                const totalOrders = this.orders.length;
+                const readyOrders = this.orders.filter(o => o.status === 'ready').length;
+                const cookingOrders = totalOrders - readyOrders;
+
+                // Find most popular item
+                let popularItem = { name: 'None', popularity: 0 };
+                for (const [name, details] of Object.entries(this.menu)) {
+                    if (details.popularity > popularItem.popularity) {
+                        popularItem = { name, popularity: details.popularity };
+                    }
+                }
+
+                const stars = (pop) => '★'.repeat(Math.floor(pop / 20)) || '☆';
+
+                kitchenStats.innerHTML = `
+                    <b>🍳 KITCHEN STATISTICS:</b><br><br>
+                    📋 Total Orders: ${totalOrders}<br>
+                    ⏳ Orders Cooking: ${cookingOrders}<br>
+                    ✅ Orders Ready: ${readyOrders}<br>
+                    👨‍🍳 Kitchen Staff: ${this.staff.chefs} chefs<br><br>
+                    <b>🍽️ MENU ITEMS:</b><br>
+                    ${Object.entries(this.menu).map(([item, details]) =>
+                    `- ${item}: $${details.price} (Cook time: ${details.time}s) ${stars(details.popularity)}`
+                ).join('<br>')}
+                `;
+            }
+
+            updateStatsDisplay() {
+                const statsText = document.getElementById('stats-text');
+
+                // Calculate occupancy rate
+                const totalRooms = Object.values(this.rooms).reduce((sum, room) => sum + room.total, 0);
+                const occupiedRooms = Object.values(this.rooms).reduce((sum, room) => sum + room.occupied, 0);
+                const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0;
+
+                // Find most popular menu item
+                let popularItem = { name: 'None', popularity: 0 };
+                for (const [name, details] of Object.entries(this.menu)) {
+                    if (details.popularity > popularItem.popularity) {
+                        popularItem = { name, popularity: details.popularity };
+                    }
+                }
+
+                statsText.innerHTML = `
+                    <b>📅 Day ${this.day}</b> | <b>🕒 ${this.timeOfDay}:00</b> ${this.isNight ? '(Night)' : '(Day)'}<br><br>
+                    <b>💰 Financial Status:</b><br>
+                    - Current Funds: $${this.money}<br>
+                    - Room Revenue: $${Object.values(this.rooms).reduce((sum, room) => sum + (room.price * room.occupied), 0)}/day<br>
+                    - Restaurant Revenue: $${this.orders.reduce((sum, order) => sum + this.menu[order.item].price, 0)} (pending)<br><br>
+                    <b>🏨 Hotel Operations:</b><br>
+                    - Occupancy Rate: ${occupancyRate.toFixed(1)}%<br>
+                    - Cleanliness: ${this.cleanliness}%<br>
+                    - Dirty Rooms: ${Object.values(this.rooms).reduce((sum, room) => sum + room.dirty, 0)}<br><br>
+                    <b>🍽️ Restaurant Operations:</b><br>
+                    - Orders in Progress: ${this.orders.length}<br>
+                    - Most Popular Item: ${popularItem.name} (${popularItem.popularity} popularity)<br>
+                    - Customer Satisfaction: ${this.satisfaction}% ${this.getSatisfactionEmoji(this.satisfaction)}<br><br>
+                    <b>👥 Staff:</b><br>
+                    - Total Employees: ${Object.values(this.staff).reduce((sum, count) => sum + count, 0)}<br>
+                    - Chefs: ${this.staff.chefs}<br>
+                    - Waiters: ${this.staff.waiters}<br>
+                    - Cleaners: ${this.staff.cleaners}<br>
+                    - Receptionists: ${this.staff.receptionists}
+                `;
+            }
+
+            drawStaffAnimations() {
+                const canvas = document.getElementById('animation-canvas');
+                canvas.className = this.isNight ? 'animation-canvas night' : 'animation-canvas';
+
+                // Clear previous staff
+                const existingStaff = document.querySelectorAll('.staff-character');
+                existingStaff.forEach(el => el.remove());
+
+                // Update sun/moon
+                const sunMoon = canvas.querySelector('.sun-moon');
+                sunMoon.textContent = this.isNight ? '🌙' : '☀️';
+                sunMoon.style.backgroundColor = this.isNight ? '#f7dc6f' : '#f1c40f';
+
+                // Staff positions
+                const staffTypes = ['chefs', 'waiters', 'cleaners', 'receptionists'];
+                const xPositions = [150, 250, 350, 450, 550, 650];
+
+                staffTypes.forEach((staffType, i) => {
+                    const count = this.staff[staffType];
+                    const maxToShow = 3; // Only show up to 3 of each staff type
+
+                    for (let j = 0; j < Math.min(count, maxToShow); j++) {
+                        const x = xPositions[i] + (j * 60);
+
+                        const staffDiv = document.createElement('div');
+                        staffDiv.className = 'staff-character';
+
+                        // Create a colored box as a placeholder for staff image
+                        const colors = {
+                            chefs: '#FF5733',
+                            waiters: '#33FF57',
+                            cleaners: '#3357FF',
+                            receptionists: '#F3FF33'
+                        };
+                        staffDiv.style.backgroundColor = colors[staffType];
+
+                        // Add label
+                        const label = document.createElement('div');
+                        label.className = 'staff-label';
+                        label.textContent = staffType.slice(0, -1).charAt(0).toUpperCase() + staffType.slice(0, -1).slice(1);
+
+                        staffDiv.appendChild(label);
+                        canvas.appendChild(staffDiv);
+                    }
+                });
+            }
+
+            addToOrder(item) {
+                this.playSound('order');
+
+                const customerName = `Customer ${Math.floor(Math.random() * 999) + 1}`;
+                const orderTime = Date.now();
+                const order = {
+                    customer: customerName,
+                    item: item,
+                    time: orderTime,
+                    status: 'pending',
+                    satisfaction: 100 // Starts at 100, decreases over time
+                };
+
+                this.orders.push(order);
+                this.menu[item].popularity += 1;
+                this.updateOrdersDisplay();
+
+                // Add to cooking queue
+                this.updateKitchenStats();
+
+                // Add customer to waiting list
+                this.customersWaiting.push(customerName);
+                this.updateCustomerDisplay();
+
+                // Start cooking in background
+                this.cookOrder(order);
+            }
+
+            cookOrder(order) {
+                const cookTime = this.menu[order.item].time;
+                // Reduce time based on chef count
+                const actualTime = Math.max(1, cookTime - (this.staff.chefs * 2)) * 1000;
+
+                this.playSound('cooking');
+
+                const startTime = Date.now();
+
+                const cookingInterval = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = elapsed / actualTime;
+
+                    if (progress >= 1) {
+                        clearInterval(cookingInterval);
+                        order.status = 'ready';
+                        this.updateOrdersDisplay();
+                        this.updateKitchenStats();
+                    } else {
+                        order.satisfaction = Math.max(0, 100 - (progress * 30));
+                        this.updateOrdersDisplay();
+                    }
+                }, 500);
+            }
+
+            serveCustomer() {
+                const readyOrders = this.orders.filter(order => order.status === 'ready');
+                if (readyOrders.length === 0) {
+                    this.showMessage("No Orders", "No orders ready to serve!");
+                    return;
+                }
+
+                const order = readyOrders[0];
+                this.orders = this.orders.filter(o => o !== order);
+
+                // Remove customer from waiting list
+                this.customersWaiting = this.customersWaiting.filter(c => c !== order.customer);
+
+                // Calculate payment and tip based on satisfaction
+                const price = this.menu[order.item].price;
+                const tipMultiplier = order.satisfaction / 100;
+                const tip = Math.floor(Math.random() * (price * tipMultiplier));
+                const total = price + tip;
+
+                this.money += total;
+                this.experience += 10;
+                this.reputation = Math.min(100, this.reputation + 2);
+                this.satisfaction = Math.min(100, this.satisfaction + 5);
+
+                this.updateDisplays();
+                this.updateOrdersDisplay();
+                this.updateCustomerDisplay();
+                this.updateKitchenStats();
+
+                this.playSound('money');
+
+                this.showMessage("Order Served",
+                    `Served ${order.item} to ${order.customer}<br>
+                    Customer Satisfaction: ${Math.floor(order.satisfaction)}%<br>
+                    Payment: $${price}<br>Tip: $${tip}<br>Total: $${total}`);
+            }
+
+            bookRoom(roomType) {
+                if (this.rooms[roomType].occupied >= this.rooms[roomType].total) {
+                    this.showMessage("Room Full", `No ${roomType} rooms available!`);
+                    return;
+                }
+
+                const customerName = `Guest ${Math.floor(Math.random() * 999) + 1}`;
+                const checkIn = new Date();
+                const checkOut = new Date(checkIn);
+                checkOut.setDate(checkOut.getDate() + Math.floor(Math.random() * 7) + 1);
+
+                const booking = {
+                    customer: customerName,
+                    roomType: roomType,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    price: this.rooms[roomType].price,
+                    dirty: false
+                };
+
+                this.bookings.push(booking);
+                this.rooms[roomType].occupied += 1;
+
+                this.updateBookingsDisplay();
+                this.createRoomStatus();
+                this.updateStatsDisplay();
+
+                this.showMessage("Booking Confirmed",
+                    `Booked ${roomType} room for ${customerName}<br>
+                    Check-in: ${this.formatDate(checkIn)}<br>
+                    Check-out: ${this.formatDate(checkOut)}`);
+            }
+
+            checkinCustomer() {
+                if (this.bookings.length === 0) {
+                    this.showMessage("No Bookings", "No bookings to check in!");
+                    return;
+                }
+
+                const booking = this.bookings[0];
+                const payment = booking.price;
+                this.money += payment;
+                this.experience += 15;
+                this.reputation += Math.floor(Math.random() * 2) + 1;
+
+                this.updateDisplays();
+                this.playSound('money');
+
+                this.showMessage("Check-in",
+                    `Checked in ${booking.customer}<br>
+                    Room: ${booking.roomType}<br>
+                    Payment: $${payment}`);
+            }
+
+            checkoutCustomer() {
+                if (this.bookings.length === 0) {
+                    this.showMessage("No Bookings", "No bookings to check out!");
+                    return;
+                }
+
+                const booking = this.bookings.shift();
+                this.rooms[booking.roomType].occupied -= 1;
+                this.rooms[booking.roomType].dirty += 1;
+
+                // Additional payment for extra days
+                const daysStayed = Math.floor((new Date() - booking.checkIn) / (1000 * 60 * 60 * 24));
+                const extraPayment = booking.price * Math.max(0, daysStayed - 1);
+
+                if (extraPayment > 0) {
+                    this.money += extraPayment;
+                    this.playSound('money');
+                    this.showMessage("Check-out",
+                        `Checked out ${booking.customer}<br>
+                        Extra days stayed: ${daysStayed - 1}<br>
+                        Extra payment: $${extraPayment}`);
+                } else {
+                    this.showMessage("Check-out", `Checked out ${booking.customer}`);
+                }
+
+                this.updateBookingsDisplay();
+                this.createRoomStatus();
+                this.updateDisplays();
+            }
+
+            hireStaff(staffType, cost) {
+                if (this.money < cost) {
+                    this.showMessage("Insufficient Funds", `Need $${cost} to hire ${staffType}!`);
+                    return;
+                }
+
+                this.money -= cost;
+                this.staff[staffType] += 1;
+
+                this.updateDisplays();
+                this.createStaffList();
+
+                this.showMessage("Staff Hired", `Hired 1 ${staffType.slice(0, -1)}!`);
+                this.drawStaffAnimations();
+            }
+
+            buyUpgrade(cost, upgradeFunc) {
+                if (this.money < cost) {
+                    this.showMessage("Insufficient Funds", `Need $${cost} for this upgrade!`);
+                    return;
+                }
+
+                this.money -= cost;
+                upgradeFunc();
+                this.updateDisplays();
+                this.playSound('money');
+            }
+
+            addRoom(roomType) {
+                this.rooms[roomType].total += 1;
+                this.createRoomStatus();
+                this.updateStatsDisplay();
+                this.showMessage("Room Added", `Added 1 ${roomType} room!`);
+            }
+
+            upgradeKitchen() {
+                // Improve cooking efficiency
+                for (const item in this.menu) {
+                    this.menu[item].time = Math.max(1, this.menu[item].time - 1);
+                }
+                this.showMessage("Kitchen Upgraded", "Kitchen equipment upgraded! Faster cooking times!");
+                this.updateKitchenStats();
+            }
+
+            upgradeFurniture() {
+                this.reputation += 10;
+                this.satisfaction = Math.min(100, this.satisfaction + 15);
+                this.updateDisplays();
+                this.showMessage("Furniture Upgraded", "Better furniture installed! Reputation and satisfaction increased!");
+            }
+
+            upgradeInterior() {
+                this.reputation += 15;
+                this.satisfaction = Math.min(100, this.satisfaction + 10);
+                this.updateDisplays();
+                this.showMessage("Interior Upgraded", "New interior design! Customers love the new look!");
+            }
+
+            upgradeGarden() {
+                this.reputation += 5;
+                this.satisfaction = Math.min(100, this.satisfaction + 5);
+                this.updateDisplays();
+                this.showMessage("Garden Upgraded", "Beautiful garden landscaping! Improves customer experience!");
+            }
+
+            marketingCampaign() {
+                // Generate more customers
+                this.reputation += 5;
+                this.updateDisplays();
+                this.showMessage("Marketing Campaign", "Marketing campaign launched! More customers coming!");
+            }
+
+            cleanTables() {
+                if (this.staff.cleaners === 0) {
+                    this.showMessage("No Cleaners", "Hire cleaners to clean tables!");
+                    return;
+                }
+
+                this.cleanliness = Math.min(100, this.cleanliness + 10);
+                this.reputation += 1;
+                this.satisfaction = Math.min(100, this.satisfaction + 5);
+                this.updateDisplays();
+                this.playSound('clean');
+                this.showMessage("Cleaning", "Tables cleaned! Cleanliness and satisfaction improved!");
+            }
+
+            cleanRooms() {
+                if (this.staff.cleaners === 0) {
+                    this.showMessage("No Cleaners", "Hire cleaners to clean rooms!");
+                    return;
+                }
+
+                for (const roomType in this.rooms) {
+                    if (this.rooms[roomType].dirty > 0) {
+                        this.rooms[roomType].dirty = 0;
+                        break;
+                    }
+                }
+
+                this.cleanliness = Math.min(100, this.cleanliness + 15);
+                this.reputation += 2;
+                this.updateDisplays();
+                this.createRoomStatus();
+                this.playSound('clean');
+                this.showMessage("Cleaning", "Rooms cleaned! Cleanliness improved!");
+            }
+
+            levelUp() {
+                this.level += 1;
+                this.experience = 0;
+                this.expNeeded = Math.floor(this.expNeeded * 1.5);
+                this.playSound('level_up');
+                this.showMessage("Level Up!",
+                    `Congratulations! You reached level ${this.level}!<br>
+                    New upgrades and features unlocked!`);
+            }
+
+            startGameLoop() {
+                setInterval(() => {
+                    // Simulate reputation decay
+                    this.reputation = Math.max(0, this.reputation - 1);
+
+                    // Simulate cleanliness decay
+                    this.cleanliness = Math.max(0, this.cleanliness - 1);
+
+                    // Simulate satisfaction decay
+                    this.satisfaction = Math.max(0, this.satisfaction - 2);
+
+                    // Random chance of new customer if rep is high
+                    if (this.reputation >= 60 && Math.random() < 0.3 && !this.isNight) {
+                        const newCustomer = `Customer ${Math.floor(Math.random() * 9000) + 1000}`;
+                        this.customersWaiting.push(newCustomer);
+                        this.updateCustomerDisplay();
+                    }
+
+                    // Update all displays
+                    this.updateDisplays();
+                    this.updateKitchenStats();
+                    this.updateStatsDisplay();
+                    this.drawStaffAnimations();
+                }, 5000); // Update every 5 seconds
+            }
+
+            startDayNightCycle() {
+                setInterval(() => {
+                    // Update time (1 hour every 6 seconds)
+                    this.timeOfDay += 1;
+                    if (this.timeOfDay >= 24) {
+                        this.timeOfDay = 0;
+                        this.day += 1;
+                        this.newDayEvents();
+                    }
+
+                    // Update day/night state
+                    this.isNight = this.timeOfDay < 6 || this.timeOfDay >= 20;
+
+                    // Update display
+                    this.updateDisplays();
+                    this.drawStaffAnimations();
+                }, 6000); // Update every 6 seconds
+            }
+
+            newDayEvents() {
+                // Collect room payments
+                const roomIncome = Object.values(this.rooms).reduce((sum, room) => {
+                    return sum + (room.price * room.occupied);
+                }, 0);
+                this.money += roomIncome;
+
+                // Pay staff salaries
+                const staffCosts = Object.values(this.staff).reduce((sum, count) => sum + count, 0) * 100;
+                this.money -= staffCosts;
+
+                // Update displays
+                this.updateDisplays();
+                this.updateStatsDisplay();
+
+                // Show daily report
+                this.showMessage("Daily Report",
+                    `Day ${this.day - 1} Report:<br><br>
+                    💰 Room Income: +$${roomIncome}<br>
+                    💸 Staff Costs: -$${staffCosts}<br>
+                    🏆 Reputation: ${this.reputation}%<br>
+                    😊 Satisfaction: ${this.satisfaction}%`);
+            }
+
+            playSound(sound) {
+                if (this.sounds[sound]) {
+                    this.sounds[sound].currentTime = 0;
+                    this.sounds[sound].play();
+                }
+            }
+
+            showMessage(title, message) {
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-message').innerHTML = message;
+                document.getElementById('modal').style.display = 'flex';
+            }
+        }
+
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.game = new HotelRestaurantManager();
+        });
+    </script>
+</body>
+
+</html>
