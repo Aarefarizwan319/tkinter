@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Digital Diary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        // Reading Mode functionality
+        function enterReadingMode() {
+            if (notes.length === 0) {
+                showToast('No diary entries to read');
+                return;
+            }
+
+            currentReadingEntries = [...notes];
+            document.getElementById('readingMode').classList.add('active');
+            renderReadingStats();
+            renderReadingEntries();
+            showToast('📖 Entered reading mode');
+        }
+
+        function exitReadingMode() {
+            document.getElementById('readingMode').classList.remove('active');
+            showToast('✕ Exited reading mode');
+        }
+
+        function renderReadingStats() {
+            const totalEntries = notes.length;
+            const totalWords = notes.reduce((total, note) => {
+                return total + note.content.split(' ').length + note.title.split(' ').length;
+            }, 0);
+
+            const moodCounts = notes.reduce((counts, note) => {
+                const mood = note.mood || '😊';
+                counts[mood] = (counts[mood] || 0) + 1;
+                return counts;
+            }, {});
+
+            const mostCommonMood = Object.entries(moodCounts).reduce((a, b) => 
+                moodCounts[a[0]] > moodCounts[b[0]] ? a : b
+            )[0] || '😊';
+
+            const oldestEntry = notes[notes.length - 1];
+            const daysSinceFirst = oldestEntry ? 
+                Math.ceil((new Date() - new Date(oldestEntry.date)) / (1000 * 60 * 60 * 24)) : 0;
+
+            document.getElementById('readingStats').innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-number">${totalEntries}</div>
+                    <div class="stat-label">Total Entries</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${totalWords.toLocaleString()}</div>
+                    <div class="stat-label">Words Written</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${mostCommonMood}</div>
+                    <div class="stat-label">Common Mood</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${daysSinceFirst}</div>
+                    <div class="stat-label">Days Journaling</div>
+                </div>
+            `;
+        }
+
+        function renderReadingEntries() {
+            const container = document.getElementById('readingEntries');
+            const emptyState = document.getElementById('readingEmptyState');
+
+            if (currentReadingEntries.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            container.innerHTML = currentReadingEntries.map((entry, index) => {
+                const date = new Date(entry.date);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const formattedTime = date.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="reading-entry" style="animation-delay: ${index * 0.1}s">
+                        <div class="reading-entry-header">
+                            <div>
+                                <div class="reading-entry-title">${entry.title}</div>
+                                <div class="reading-entry-meta">
+                                    <span>📅 ${formattedDate}</span>
+                                    <span>🕐 ${formattedTime}</span>
+                                    <span>📝 ${entry.content.split(' ').length} words</span>
+                                </div>
+                            </div>
+                            <div class="reading-entry-mood">${entry.mood || '😊'}</div>
+                        </div>
+                        <div class="reading-entry-text">${entry.content}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function sortReadingEntries() {
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            switch (sortOrder) {
+                case 'newest':
+                    currentReadingEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'oldest':
+                    currentReadingEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    break;
+                case 'title':
+                    currentReadingEntries.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                case 'mood':
+                    currentReadingEntries.sort((a, b) => (a.mood || '😊').localeCompare(b.mood || '😊'));
+                    break;
+            }
+            
+            renderReadingEntries();
+            showToast(`Sorted by ${sortOrder}`);
+        }
+
+        function searchReadingEntries() {
+            const query = document.getElementById('readingSearchInput').value.toLowerCase();
+            
+            if (!query) {
+                currentReadingEntries = [...notes];
+            } else {
+                currentReadingEntries = notes.filter(entry => 
+                    entry.title.toLowerCase().includes(query) || 
+                    entry.content.toLowerCase().includes(query)
+                );
+            }
+            
+            // Maintain current sort order
+            sortReadingEntries();
+        }
+
+        function scrollToTop() {
+            document.querySelector('.reading-content').scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        function scrollToBottom() {
+            const content = document.querySelector('.reading-content');
+            content.scrollTo({
+                top: content.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #5b5cf6;
+            --secondary-color: #f8fafc;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --bg-color: #ffffff;
+            --card-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --secondary-color: #1e293b;
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-screen {
+            max-width: 400px;
+            margin: 100px auto;
+        }
+
+        .login-screen h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-bar {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .note-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .note-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .note-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .note-mood {
+            font-size: 24px;
+        }
+
+        .note-content {
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .note-actions .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--text-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .mood-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mood-btn {
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .mood-btn.active {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .theme-toggle {
+            width: 50px;
+            height: 25px;
+            background: var(--border-color);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            background: var(--primary-color);
+        }
+
+        [data-theme="dark"] .theme-toggle::after {
+            transform: translateX(25px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .header-actions {
+                justify-content: center;
+            }
+
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                padding: 20px;
+                width: 95%;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="card">
+            <h1>📓 My Digital Diary</h1>
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="passwordInput">Enter Password:</label>
+                    <input type="password" id="passwordInput" placeholder="Your diary password">
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="login()">
+                    🔓 Unlock Diary
+                </button>
+            </div>
+            <div id="setupForm" class="hidden">
+                <p style="text-align: center; margin-bottom: 20px; color: var(--text-muted);">
+                    Welcome! Set up your diary password:
+                </p>
+                <div class="form-group">
+                    <label for="newPasswordInput">Create Password:</label>
+                    <input type="password" id="newPasswordInput" placeholder="Choose a secure password">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPasswordInput">Confirm Password:</label>
+                    <input type="password" id="confirmPasswordInput" placeholder="Confirm your password">
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="setupPassword()">
+                    🔐 Create Diary
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">📓 My Digital Diary</div>
+                <div class="header-actions">
+                    <div class="theme-toggle" onclick="toggleTheme()"></div>
+                    <button class="btn btn-primary" onclick="showAddNoteModal()">
+                        ➕ New Entry
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportNotes()">
+                        📤 Export
+                    </button>
+                    <button class="btn btn-secondary" onclick="lockDiary()">
+                        🔒 Lock
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <div class="search-icon">🔍</div>
+                <input type="text" id="searchInput" placeholder="Search your diary entries..." oninput="searchNotes()">
+            </div>
+
+            <!-- Notes Grid -->
+            <div id="notesGrid" class="notes-grid"></div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state hidden">
+                <h3>📝 Start Your Journey</h3>
+                <p>Your diary is empty. Create your first entry to begin!</p>
+                <button class="btn btn-primary" onclick="showAddNoteModal()" style="margin-top: 20px;">
+                    ✍️ Write First Entry
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div id="noteModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">New Diary Entry</h2>
+                <button class="close-btn" onclick="closeNoteModal()">×</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="noteTitle">Entry Title:</label>
+                <input type="text" id="noteTitle" placeholder="What's on your mind today?">
+            </div>
+
+            <div class="form-group">
+                <label>How are you feeling? 😊</label>
+                <div class="mood-selector">
+                    <div class="mood-btn" data-mood="😊" onclick="selectMood('😊')">😊</div>
+                    <div class="mood-btn" data-mood="😐" onclick="selectMood('😐')">😐</div>
+                    <div class="mood-btn" data-mood="😢" onclick="selectMood('😢')">😢</div>
+                    <div class="mood-btn" data-mood="😍" onclick="selectMood('😍')">😍</div>
+                    <div class="mood-btn" data-mood="😤" onclick="selectMood('😤')">😤</div>
+                    <div class="mood-btn" data-mood="🤔" onclick="selectMood('🤔')">🤔</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="noteContent">Your thoughts:</label>
+                <textarea id="noteContent" rows="8" placeholder="Write about your day, thoughts, dreams..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeNoteModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNote()">💾 Save Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Global variables
+        let notes = [];
+        let currentNoteId = null;
+        let selectedMood = '😊';
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTheme();
+            checkPassword();
+        });
+
+        // Theme management
+        function loadTheme() {
+            const theme = localStorage.getItem('diaryTheme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('diaryTheme', newTheme);
+        }
+
+        // Password management
+        function checkPassword() {
+            const savedPassword = localStorage.getItem('diaryPassword');
+            if (savedPassword) {
+                showLoginForm();
+            } else {
+                showSetupForm();
+            }
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('setupForm').classList.add('hidden');
+        }
+
+        function showSetupForm() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('setupForm').classList.remove('hidden');
+        }
+
+        function setupPassword() {
+            const password = document.getElementById('newPasswordInput').value;
+            const confirmPassword = document.getElementById('confirmPasswordInput').value;
+
+            if (!password || password.length < 4) {
+                showToast('Password must be at least 4 characters long');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match');
+                return;
+            }
+
+            localStorage.setItem('diaryPassword', btoa(password)); // Basic encoding
+            showToast('Diary created successfully!');
+            setTimeout(() => showMainApp(), 500);
+        }
+
+        function login() {
+            const password = document.getElementById('passwordInput').value;
+            const savedPassword = localStorage.getItem('diaryPassword');
+
+            if (btoa(password) === savedPassword) {
+                showMainApp();
+            } else {
+                showToast('Incorrect password');
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function lockDiary() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('passwordInput').value = '';
+            showLoginForm();
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            loadNotes();
+        }
+
+        // Notes management
+        function loadNotes() {
+            const savedNotes = localStorage.getItem('diaryNotes');
+            notes = savedNotes ? JSON.parse(savedNotes) : [];
+            renderNotes(notes);
+        }
+
+        function saveNotesToStorage() {
+            localStorage.setItem('diaryNotes', JSON.stringify(notes));
+        }
+
+        function renderNotes(notesToRender) {
+            const grid = document.getElementById('notesGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (notesToRender.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            grid.innerHTML = notesToRender.map(note => `
+                <div class="note-card" onclick="editNote('${note.id}')">
+                    <div class="note-header">
+                        <div>
+                            <div class="note-title">${note.title}</div>
+                            <div class="note-date">${new Date(note.date).toLocaleDateString()}</div>
+                        </div>
+                        <div class="note-mood">${note.mood || '😊'}</div>
+                    </div>
+                    <div class="note-content">${note.content}</div>
+                    <div class="note-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-secondary" onclick="editNote('${note.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger" onclick="deleteNote('${note.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showAddNoteModal() {
+            currentNoteId = null;
+            selectedMood = '😊';
+            document.getElementById('modalTitle').textContent = 'New Diary Entry';
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            selectMood('😊');
+            document.getElementById('noteModal').classList.add('active');
+        }
+
+        function editNote(id) {
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+
+            currentNoteId = id;
+            selectedMood = note.mood || '😊';
+            document.getElementById('modalTitle').textContent = 'Edit Diary Entry';
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteContent').value = note.content;
+            selectMood(note.mood || '😊');
+            document.getElementById('noteModal').classList.add('active');
+        }
+
+        function closeNoteModal() {
+            document.getElementById('noteModal').classList.remove('active');
+            currentNoteId = null;
+        }
+
+        function selectMood(mood) {
+            selectedMood = mood;
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-mood="${mood}"]`).classList.add('active');
+        }
+
+        function saveNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value.trim();
+
+            if (!title || !content) {
+                showToast('Please fill in both title and content');
+                return;
+            }
+
+            if (currentNoteId) {
+                // Edit existing note
+                const noteIndex = notes.findIndex(n => n.id === currentNoteId);
+                if (noteIndex !== -1) {
+                    notes[noteIndex] = {
+                        ...notes[noteIndex],
+                        title,
+                        content,
+                        mood: selectedMood,
+                        lastModified: new Date().toISOString()
+                    };
+                }
+            } else {
+                // Add new note
+                const newNote = {
+                    id: Date.now().toString(),
+                    title,
+                    content,
+                    mood: selectedMood,
+                    date: new Date().toISOString(),
+                    lastModified: new Date().toISOString()
+                };
+                notes.unshift(newNote);
+            }
+
+            saveNotesToStorage();
+            renderNotes(notes);
+            closeNoteModal();
+            showToast(currentNoteId ? 'Entry updated!' : 'Entry saved!');
+        }
+
+        function deleteNote(id) {
+            if (confirm('Are you sure you want to delete this diary entry?')) {
+                notes = notes.filter(n => n.id !== id);
+                saveNotesToStorage();
+                renderNotes(notes);
+                showToast('Entry deleted');
+            }
+        }
+
+        // Search functionality
+        function searchNotes() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            if (!query) {
+                renderNotes(notes);
+                return;
+            }
+
+            const filteredNotes = notes.filter(note => 
+                note.title.toLowerCase().includes(query) || 
+                note.content.toLowerCase().includes(query)
+            );
+            renderNotes(filteredNotes);
+        }
+
+        // Export functionality
+        function exportNotes() {
+            if (notes.length === 0) {
+                showToast('No entries to export');
+                return;
+            }
+
+            const exportText = notes.map(note => {
+                const date = new Date(note.date).toLocaleDateString();
+                return `${note.title} - ${date} ${note.mood || ''}\n${'='.repeat(50)}\n${note.content}\n\n`;
+            }).join('');
+
+            // Export as TXT
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `diary-export-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showToast('Diary exported successfully!');
+        }
+
+        // Music functionality
+        function initMusic() {
+            updateMusicButton();
+        }
+
+        function toggleMusic() {
+            // Request user interaction first for audio to work
+            if (!isMusicPlaying) {
+                startBackgroundMusic();
+            } else {
+                stopBackgroundMusic();
+            }
+            updateMusicButton();
+        }
+
+        function startBackgroundMusic() {
+            try {
+                // Try to use Web Audio API for ambient sounds
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Resume context if suspended
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                // Create ambient tone
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                const filter = audioContext.createBiquadFilter();
+
+                // Set up a gentle, ambient tone
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator.type = 'sine';
+
+                // Add some filtering for smoother sound
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, audioContext.currentTime);
+
+                // Very low volume for ambient effect
+                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+
+                // Connect the audio graph
+                oscillator.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Start the oscillator
+                oscillator.start();
+
+                // Store references for stopping later
+                backgroundMusic = {
+                    audioContext,
+                    oscillator,
+                    gainNode,
+                    filter
+                };
+
+                isMusicPlaying = true;
+                localStorage.setItem('diaryMusicState', 'playing');
+                showToast('🎵 Ambient music started');
+
+            } catch (error) {
+                console.error('Web Audio API failed, trying HTML5 audio:', error);
+                // Fallback: create a simple beep tone
+                createSimpleAudioFallback();
+            }
+        }
+
+        function createSimpleAudioFallback() {
+            // Create audio context for a simple tone
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create a gentle ambient sound with multiple oscillators
+                const osc1 = audioContext.createOscillator();
+                const osc2 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc1.frequency.value = 220; // A3
+                osc2.frequency.value = 330; // E4
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+                
+                gainNode.gain.value = 0.02; // Very quiet
+                
+                osc1.connect(gainNode);
+                osc2.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                osc1.start();
+                osc2.start();
+                
+                backgroundMusic = {
+                    audioContext,
+                    oscillators: [osc1, osc2],
+                    gainNode
+                };
+                
+                isMusicPlaying = true;
+                localStorage.setItem('diaryMusicState', 'playing');
+                showToast('🎵 Background music on');
+                
+            } catch (e) {
+                showToast('Audio not supported in this browser');
+            }
+        }
+
+        function stopBackgroundMusic() {
+            if (backgroundMusic) {
+                try {
+                    if (backgroundMusic.oscillator) {
+                        backgroundMusic.oscillator.stop();
+                        backgroundMusic.oscillator.disconnect();
+                    }
+                    if (backgroundMusic.oscillators) {
+                        backgroundMusic.oscillators.forEach(osc => {
+                            osc.stop();
+                            osc.disconnect();
+                        });
+                    }
+                    if (backgroundMusic.gainNode) {
+                        backgroundMusic.gainNode.disconnect();
+                    }
+                    if (backgroundMusic.filter) {
+                        backgroundMusic.filter.disconnect();
+                    }
+                } catch (e) {
+                    console.log('Error stopping audio:', e);
+                }
+                
+                backgroundMusic = null;
+            }
+            
+            isMusicPlaying = false;
+            localStorage.setItem('diaryMusicState', 'stopped');
+            showToast('🔇 Music stopped');
+        }
+
+        function updateMusicButton() {
+            const musicButton = document.getElementById('musicToggle');
+            if (!musicButton) return;
+            
+            if (isMusicPlaying) {
+                musicButton.innerHTML = `
+                    <div class="music-visualizer">
+                        <div class="music-bar"></div>
+                        <div class="music-bar"></div>
+                        <div class="music-bar"></div>
+                    </div>
+                    Music On
+                `;
+                musicButton.classList.remove('music-toggle-muted');
+            } else {
+                musicButton.innerHTML = '🎵 Music';
+                musicButton.classList.add('music-toggle-muted');
+            }
+        }
+
+        // Toast notifications
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Handle Enter key in password fields
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (document.getElementById('passwordInput') === document.activeElement) {
+                    login();
+                } else if (document.getElementById('confirmPasswordInput') === document.activeElement) {
+                    setupPassword();
+                }
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('noteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeNoteModal();
+            }
+        });
+    </script>
+</body>
+</html>
