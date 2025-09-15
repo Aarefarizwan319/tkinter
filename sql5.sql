@@ -22,3 +22,4 @@ FROM PRODUCTS;
 
 SELECT SUM(PRICE) AS TOTAL_PRICE
 FROM PRODUCTS;
+                                                    
